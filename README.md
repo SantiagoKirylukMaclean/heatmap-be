@@ -1,22 +1,22 @@
 # OPIS HeatMap MVP — Backend (Spring Boot + SQL + Redis)
 
-## 🎯 Objetivo
-Backend en **Spring Boot 3 (Java 21)** para exponer un API que alimente un dashboard de **heat maps** de precios y ventas de combustibles en EE.UU.
+## 🎯 Goal
+Backend in **Spring Boot 3 (Java 21)** to expose an API powering a dashboard with **heat maps** of US fuel prices and sales.
 
-El enfoque es un **MVP monolítico**, pero diseñado con fronteras claras para escalar a microservicios en el futuro.
+The MVP is a **monolithic app**, but designed with clear boundaries to evolve into microservices in the future.
 
 ---
 
-## ⚙️ Arquitectura
+## ⚙️ Architecture
 
 - **Spring Boot 3 + Gradle**
-- **Base de datos relacional**: PostgreSQL (MVP local) y soporte para MSSQL (producción).
-- **ORM / JPA** con **Flyway** para migraciones.
-- **Redis** para caching de agregados.
-- **Springdoc OpenAPI** para documentación de APIs.
-- **Spring Batch o @Scheduled** para jobs de pre-aggregación.
+- **Relational DB**: PostgreSQL (MVP) with MSSQL support (production).
+- **ORM / JPA** with **Flyway** for migrations.
+- **Redis** for caching aggregated results.
+- **Springdoc OpenAPI** for API documentation.
+- **Spring Batch or @Scheduled** jobs for pre-aggregation.
 
-Flujo:
+Flow:
 ```
 Client (Dashboard) --> HeatMap API --> HeatMap Service --> Redis Cache
                                               │
@@ -27,7 +27,7 @@ Client (Dashboard) --> HeatMap API --> HeatMap Service --> Redis Cache
 
 ---
 
-## 🗄️ Modelo de Datos
+## 🗄️ Data Model
 
 **Station**
 - id (PK), code, name, state, latitude, longitude  
@@ -35,13 +35,13 @@ Client (Dashboard) --> HeatMap API --> HeatMap Service --> Redis Cache
 **Product**
 - id (PK), code, name, family  
 
-**Price** (histórico de precios)
+**Price** (price history)
 - id (PK), station_id (FK), product_id (FK), ts, price  
 
-**Sales** (volumen vendido)
+**Sales** (aggregated sales)
 - id (PK), station_id (FK), product_id (FK), ts, volume, revenue?, tx_count?  
 
-🔗 Relaciones:
+🔗 Relations:
 - Station (1) ──< Price, Sales  
 - Product (1) ──< Price, Sales  
 
@@ -49,14 +49,14 @@ Client (Dashboard) --> HeatMap API --> HeatMap Service --> Redis Cache
 
 ## 🧩 HeatMap Component
 
-Un **vertical slice** dentro del monolito que contiene:
-- **Repository Layer** → acceso a entidades (Station, Product, Price, Sales).
-- **Service Layer** → lógica de agregación (avg price, total volume, etc).
-- **Cache Layer (Redis)** → resultados precalculados (`metric:period`).
-- **API Layer (REST)**:
+A **vertical slice** within the monolith containing:
+- **Repository Layer** → access to Station, Product, Price, Sales.  
+- **Service Layer** → aggregation logic (avg price, total volume, etc).  
+- **Cache Layer (Redis)** → precomputed results (`metric:period`).  
+- **API Layer (REST)** →  
   - `GET /api/heatmap?metric=price|volume&period=last30d`
 
-Ejemplo de respuesta:
+Example response:
 ```json
 [
   { "state": "TX", "lat": 29.76, "lon": -95.36, "value": 2.15 },
@@ -66,61 +66,66 @@ Ejemplo de respuesta:
 
 ---
 
-## 📊 Estrategia de Escalabilidad (2B+ filas)
+## 📊 Scaling Strategy (2B+ rows)
 
-- **Pre-aggregation**: materialized views o tablas resumen (ej. por día/estado/producto).
-- **Batch/Scheduler**: refresco de agregados fuera de línea (ej. cada noche).
-- **Indexación & particionado**: `(station_id, product_id, ts)` + particiones por mes/año.
-- **Cache Redis**: dashboard consulta siempre resultados precalculados y cacheados.
+- **Pre-aggregation**: materialized views or summary tables (by day/state/product).  
+- **Batch/Scheduler**: refresh offline (daily/hourly).  
+- **Indexing & partitioning**: `(station_id, product_id, ts)` + monthly/yearly partitions.  
+- **Redis cache**: dashboard always queries precomputed and cached results.
 
 ---
 
-## ❓ Preparación para la Entrevista
+## ❓ Interview Preparation
 
 ### 1. Monolith vs. Microservices
-- Experiencia en ambos enfoques (Java EE monolitos y Spring Boot microservicios).
-- Preferencia para MVP: **monolito modular** (faster delivery, menos overhead).
-- Diseño con fronteras claras para futura migración a microservicios.
+- Experience in both (Java EE monoliths and Spring Boot microservices).  
+- MVP preference: **modular monolith** (faster delivery, less overhead).  
+- Clear boundaries designed for future migration.
 
-**Frase clave:**  
+**Key phrase:**  
 > “I like to start with a modular monolith, deliver value quickly, but design boundaries so that they can evolve into microservices when needed.”
 
 ---
 
-### 2. Manejo de 2B rows
-- Experiencia previa con sistemas de millones de registros/eventos.
-- Estrategia: pre-aggregations en DB + batch jobs + Redis cache.
-- El frontend **nunca** accede directamente a tablas crudas.
+### 2. Handling 2B rows
+- Previous experience with millions of records/events.  
+- Strategy: pre-aggregations in DB + batch jobs + Redis cache.  
+- Frontend **never** queries raw tables.
 
-**Frase clave:**  
+**Key phrase:**  
 > “With billions of rows, I would never let the frontend query raw tables. I’d precompute aggregates, store them in views, and expose them through cached APIs.”
 
 ---
 
 ### 3. HeatMap Component
-- Contiene repositorios, lógica de agregación, cache y API contract.
-- Se apoya en frameworks: **Spring Batch**, **Redis**, **Flyway**, **OpenAPI**.
-- Heavy lifting en DB/batch, runtime liviano y rápido.
+- Contains repositories, aggregation logic, cache, and API contract.  
+- Supported by frameworks: **Spring Batch**, **Redis**, **Flyway**, **OpenAPI**.  
+- Heavy lifting done in DB/batch, lightweight runtime API.
 
-**Frase clave:**  
+**Key phrase:**  
 > “The HeatMap component is a vertical slice: aggregation logic, caching, and API. Heavy lifting happens offline via batch jobs and materialized views.”
 
 ---
 
-## 🚀 Roadmap MVP (para agentes de IA)
+## 🚀 MVP Roadmap (for AI agents)
 
-1. **Bootstrap**: Spring Boot app con Gradle.  
-2. **DB migrations**: Flyway con tablas Station, Product, Price, Sales.  
-3. **Seed Data**: ~50k ventas sintéticas para pruebas locales.  
-4. **API**: implementar `/api/heatmap`.  
-5. **Cache**: integración con Redis.  
-6. **Aggregation**: empezar con lógica en memoria → migrar a SQL views.  
-7. **Batch**: job programado para refrescar agregados.  
+1. **Bootstrap**: Spring Boot app with Gradle.  
+2. **DB migrations**: Flyway with Station, Product, Price, Sales tables.  
+3. **Seed Data**: ~50k synthetic sales for local tests.  
+4. **API**: implement `/api/heatmap`.  
+5. **Cache**: integrate Redis.  
+6. **Aggregation**: start with in-memory → migrate to SQL views.  
+7. **Batch**: scheduled job to refresh aggregates.  
 8. **Docs & Monitoring**: Swagger + Actuator.
 
 ---
 
-## ✅ Criterio de éxito del MVP
-- App corre local con Docker (Postgres + Redis).  
-- Endpoint `/api/heatmap` responde en < 1s gracias a cache.  
-- DB lista para escalar a 2B filas con materialized views + batch.  
+## 🧭 Step-by-step Action Plan
+- See [PLAN_accion_es.md](./PLAN_accion_es.md) for commit-by-commit steps and acceptance criteria (Spanish).
+
+---
+
+## ✅ MVP Success Criteria
+- App runs locally with Docker (Postgres + Redis).  
+- `/api/heatmap` responds in < 1s (thanks to cache).  
+- DB ready to scale to 2B rows with materialized views + batch.  
