@@ -1,5 +1,7 @@
 package com.puetsnao.heatmap.api;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +15,8 @@ import java.util.Optional;
 @RestController
 @RequestMapping(path = "/api/health", produces = MediaType.APPLICATION_JSON_VALUE)
 public class HealthController {
+
+    private static final Logger log = LoggerFactory.getLogger(HealthController.class);
 
     private final Environment environment;
 
@@ -31,6 +35,7 @@ public class HealthController {
         if (commitSha != null && !commitSha.isBlank()) {
             result.put("commitSha", commitSha);
         }
+        log.info("health endpoint invoked status=UP commitSha={}", commitSha);
         return result;
     }
 }

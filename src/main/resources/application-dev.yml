@@ -1,0 +1,23 @@
+logging:
+  level:
+    root: INFO
+    org.springframework.web: INFO
+    com.puetsnao.heatmap: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info"
+  endpoint:
+    health:
+      enabled: true
+    info:
+      enabled: true
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
