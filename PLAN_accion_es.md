@@ -20,7 +20,6 @@ La app es un monolito modular listo para evolucionar a microservicios. Este plan
 ---
 
 ## Paso 1 — MVP mínimo: Health Controller
-- Rama: `feature/health-controller`.
 - Cambios:
   - Añadir controlador REST `GET /api/health` que devuelva `{ "status": "UP" }` y `commitSha` si existe.
   - Añadir test `HealthControllerTests` (MockMvc) con 200 OK.
@@ -33,7 +32,6 @@ La app es un monolito modular listo para evolucionar a microservicios. Este plan
 ---
 
 ## Paso 2 — Calidad y utilidades dev
-- Rama: `feature/dev-tooling`.
 - Cambios:
   - Dependencias: springdoc-openapi-ui, actuator en dev, lombok opcional.
   - Config perfiles: `application.yml` + `application-dev.yml`.
@@ -46,7 +44,6 @@ La app es un monolito modular listo para evolucionar a microservicios. Este plan
 ---
 
 ## Paso 3 — Persistencia base (Flyway + JPA)
-- Rama: `feature/db-bootstrap`.
 - Cambios:
   - Agregar Flyway, datasource Postgres (docker) y perfiles `dev`/`test`.
   - Migración `V1__base_schema.sql` con tablas: `station`, `product`, `price`, `sales`.
@@ -60,7 +57,6 @@ La app es un monolito modular listo para evolucionar a microservicios. Este plan
 ---
 
 ## Paso 4 — Datos de ejemplo (semilla)
-- Rama: `feature/seed-data`.
 - Cambios:
   - Script `V2__seed_reference_data.sql` para `station` y `product`.
   - Cargador dev que inserte ~50k filas sintéticas en `sales` y `price`.
@@ -72,7 +68,6 @@ La app es un monolito modular listo para evolucionar a microservicios. Este plan
 ---
 
 ## Paso 5 — Vertical HeatMap (v1 en memoria)
-- Rama: `feature/heatmap-v1`.
 - Cambios:
   - DTO `HeatPoint { state, lat, lon, value }`.
   - Servicio que agrega en memoria por estado: avg(price) o sum(volume) últimos 30 días.
@@ -87,7 +82,6 @@ La app es un monolito modular listo para evolucionar a microservicios. Este plan
 ---
 
 ## Paso 6 — Caching con Redis
-- Rama: `feature/cache-redis`.
 - Cambios:
   - Agregar Redis (docker-compose) y Spring Data Redis.
   - Cachear respuestas por clave `heatmap:{metric}:{period}` con TTL configurable.
@@ -99,7 +93,6 @@ La app es un monolito modular listo para evolucionar a microservicios. Este plan
 ---
 
 ## Paso 7 — Agregación en SQL (materialized view / summary table)
-- Rama: `feature/aggregation-sql`.
 - Cambios:
   - `V3__summary_sales_price.sql`: vista materializada o tabla resumen por día-estado-producto con índices.
   - Servicio cambia a consultar la vista en vez de tablas crudas.
@@ -111,7 +104,6 @@ La app es un monolito modular listo para evolucionar a microservicios. Este plan
 ---
 
 ## Paso 8 — Batch/Scheduler para refresco de agregados
-- Rama: `feature/batch-refresh`.
 - Cambios:
   - Spring Batch o `@Scheduled` que recalcule/resume incrementalmente.
   - Manejo de datos fuera de orden: upserts por ventana (p.ej., últimos N días) y marca de watermarks.
@@ -123,7 +115,6 @@ La app es un monolito modular listo para evolucionar a microservicios. Este plan
 ---
 
 ## Paso 9 — Observabilidad y seguridad básica
-- Rama: `feature/ops-hardening`.
 - Cambios:
   - Actuator endpoints (health, metrics, info) y `info.commit.id`.
   - Logs de request (excl. PII) y rate limit básico opcional.
@@ -135,7 +126,6 @@ La app es un monolito modular listo para evolucionar a microservicios. Este plan
 ---
 
 ## Paso 10 — Docker Compose para dev
-- Rama: `feature/infra-dev`.
 - Cambios:
   - `docker-compose.yml` con Postgres y Redis.
   - Perfilar app para apuntar a servicios de compose.
@@ -147,7 +137,6 @@ La app es un monolito modular listo para evolucionar a microservicios. Este plan
 ---
 
 ## Paso 11 — Documentación abierta
-- Rama: `feature/docs-openapi`.
 - Cambios:
   - Describir `/api/health` y `/api/heatmap` con anotaciones OpenAPI.
   - README: flujos, ejemplos y tiempos esperados.
@@ -159,7 +148,6 @@ La app es un monolito modular listo para evolucionar a microservicios. Este plan
 ---
 
 ## Paso 12 — Tests y rendimiento
-- Rama: `feature/tests-perf`.
 - Cambios:
   - Tests de repos con datos dev (Testcontainers opcional).
   - JMH o simple medidor de latencia para endpoint cacheado.
@@ -171,7 +159,6 @@ La app es un monolito modular listo para evolucionar a microservicios. Este plan
 ---
 
 ## Paso 13 — Preparación a microservicios (opcional)
-- Rama: `feature/boundaries`.
 - Cambios:
   - Paquetes por vertical (heatmap, station, product, price, sales) con interfaces claras.
   - Configurar módulos lógicos y límites anti-corrupción.
