@@ -36,6 +36,7 @@ public class DefaultHeatmapService implements HeatmapService {
 
     @Override
     @Transactional(readOnly = true)
+    @org.springframework.cache.annotation.Cacheable(cacheNames = "heatmap", key = "'heatmap:v2:' + #metric.name().toLowerCase() + ':' + #period.name().toLowerCase()")
     public List<HeatPoint> heatmap(Metric metric, Period period) {
         LocalDateTime to = LocalDateTime.now();
         LocalDateTime from = switch (period) {

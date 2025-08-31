@@ -18,6 +18,10 @@ management:
     info:
       enabled: true
 
+heatmap:
+  cache:
+    ttl-seconds: 300
+
 springdoc:
   api-docs:
     enabled: true

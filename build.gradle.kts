@@ -24,6 +24,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
+    implementation("org.springframework.boot:spring-boot-starter-cache")
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
     implementation("org.flywaydb:flyway-core:10.17.2")
     implementation("org.flywaydb:flyway-database-postgresql:10.17.2")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
