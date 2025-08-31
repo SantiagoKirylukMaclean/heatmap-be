@@ -4,12 +4,12 @@ import com.puetsnao.heatmap.application.HeatmapService;
 import com.puetsnao.heatmap.domain.HeatPoint;
 import com.puetsnao.heatmap.domain.Metric;
 import com.puetsnao.heatmap.domain.Period;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.Mockito;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
 
@@ -18,14 +18,19 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = HeatmapController.class)
 class HeatmapControllerTests {
 
-    @Autowired
     private MockMvc mockMvc;
-
-    @MockBean
     private HeatmapService heatmapService;
+
+    @BeforeEach
+    void setup() {
+        heatmapService = Mockito.mock(HeatmapService.class);
+        mockMvc = MockMvcBuilders
+                .standaloneSetup(new HeatmapController(heatmapService))
+                .setMessageConverters(new org.springframework.http.converter.json.MappingJackson2HttpMessageConverter())
+                .build();
+    }
 
     @Test
     void returnsHeatmapPoints() throws Exception {
