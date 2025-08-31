@@ -3,6 +3,7 @@ plugins {
 	id("org.springframework.boot") version "3.5.5"
 	id("io.spring.dependency-management") version "1.1.7"
 	id("org.flywaydb.flyway") version "10.17.2"
+	id("com.gorylenko.gradle-git-properties") version "2.4.2"
 }
 
 group = "com.puetsnao"
@@ -13,6 +14,10 @@ java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(17)
 	}
+}
+
+springBoot {
+	buildInfo()
 }
 
 repositories {

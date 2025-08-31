@@ -11,12 +11,17 @@ management:
   endpoints:
     web:
       exposure:
-        include: "health,info,scheduledtasks"
+        include: "health,info,metrics,scheduledtasks"
   endpoint:
     health:
       enabled: true
     info:
       enabled: true
+    metrics:
+      enabled: true
+  info:
+    git:
+      mode: full
 
 heatmap:
   cache:

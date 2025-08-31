@@ -4,16 +4,29 @@ logging:
     org.springframework.web: INFO
     com.puetsnao.heatmap: DEBUG
 
+server:
+  tomcat:
+    accesslog:
+      enabled: true
+      pattern: '%h %l %u %t "%m %U %H" %s %b %D'
+      rotate: true
+      request-attributes-enabled: true
+
 management:
   endpoints:
     web:
       exposure:
-        include: "health,info,scheduledtasks"
+        include: "health,info,metrics,scheduledtasks"
   endpoint:
     health:
       enabled: true
     info:
       enabled: true
+    metrics:
+      enabled: true
+  info:
+    git:
+      mode: full
 
 spring:
   datasource:
