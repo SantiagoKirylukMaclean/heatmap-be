@@ -1,6 +1,5 @@
-package com.puetsnao.heatmap.infrastructure.persistence.jpa.repository;
+package com.puetsnao.product.infrastructure;
 
-import com.puetsnao.heatmap.infrastructure.persistence.jpa.entity.ProductEntity;
 import org.springframework.data.repository.Repository;
 
 import java.util.List;

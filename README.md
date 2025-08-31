@@ -27,6 +27,7 @@ Client (Dashboard) --> HeatMap API --> HeatMap Service --> Redis Cache
 
 ---
 
+
 ## 🗄️ Data Model
 
 **Station**

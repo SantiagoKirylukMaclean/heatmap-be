@@ -1,6 +1,5 @@
-package com.puetsnao.heatmap.infrastructure.persistence.jpa.repository;
+package com.puetsnao.sales.infrastructure;
 
-import com.puetsnao.heatmap.infrastructure.persistence.jpa.entity.SaleEntity;
 import org.springframework.data.repository.Repository;
 
 import java.time.LocalDateTime;

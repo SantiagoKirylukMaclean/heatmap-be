@@ -1,4 +1,4 @@
-package com.puetsnao.heatmap.infrastructure.persistence.jpa.entity;
+package com.puetsnao.product.infrastructure;
 
 import jakarta.persistence.*;
 

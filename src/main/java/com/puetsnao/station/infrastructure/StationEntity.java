@@ -1,4 +1,4 @@
-package com.puetsnao.heatmap.infrastructure.persistence.jpa.entity;
+package com.puetsnao.station.infrastructure;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;

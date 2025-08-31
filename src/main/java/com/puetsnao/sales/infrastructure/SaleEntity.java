@@ -1,12 +1,14 @@
-package com.puetsnao.heatmap.infrastructure.persistence.jpa.entity;
+package com.puetsnao.sales.infrastructure;
 
+import com.puetsnao.station.infrastructure.StationEntity;
+import com.puetsnao.product.infrastructure.ProductEntity;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "price")
-public class PriceEntity {
+@Table(name = "sales")
+public class SaleEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,20 +22,20 @@ public class PriceEntity {
     @JoinColumn(name = "product_id", nullable = false)
     private ProductEntity product;
 
-    @Column(name = "amount", nullable = false, precision = 12, scale = 4)
-    private BigDecimal amount;
+    @Column(name = "sold_at", nullable = false)
+    private LocalDateTime soldAt;
 
-    @Column(name = "effective_at", nullable = false)
-    private LocalDateTime effectiveAt;
+    @Column(name = "volume", nullable = false, precision = 14, scale = 3)
+    private BigDecimal volume;
 
     public Long getId() { return id; }
     public StationEntity getStation() { return station; }
     public ProductEntity getProduct() { return product; }
-    public BigDecimal getAmount() { return amount; }
-    public LocalDateTime getEffectiveAt() { return effectiveAt; }
+    public LocalDateTime getSoldAt() { return soldAt; }
+    public BigDecimal getVolume() { return volume; }
 
     public void setStation(StationEntity station) { this.station = station; }
     public void setProduct(ProductEntity product) { this.product = product; }
-    public void setAmount(BigDecimal amount) { this.amount = amount; }
-    public void setEffectiveAt(LocalDateTime effectiveAt) { this.effectiveAt = effectiveAt; }
+    public void setSoldAt(LocalDateTime soldAt) { this.soldAt = soldAt; }
+    public void setVolume(BigDecimal volume) { this.volume = volume; }
 }

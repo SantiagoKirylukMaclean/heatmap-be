@@ -1,6 +1,5 @@
-package com.puetsnao.heatmap.infrastructure.persistence.jpa.repository;
+package com.puetsnao.price.infrastructure;
 
-import com.puetsnao.heatmap.infrastructure.persistence.jpa.entity.PriceEntity;
 import org.springframework.data.repository.Repository;
 
 import java.util.List;
