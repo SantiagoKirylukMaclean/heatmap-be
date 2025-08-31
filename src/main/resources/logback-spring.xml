@@ -2,34 +2,51 @@
 <configuration scan="true">
     <springProperty scope="context" name="APP_NAME" source="spring.application.name" defaultValue="app"/>
 
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} [%thread] %-5level %logger{36} - %msg%n</pattern>
+    <!-- Habilita %clr y conversores de stacktrace de Spring Boot -->
+    <conversionRule conversionWord="clr"
+                    converterClass="org.springframework.boot.logging.logback.ColorConverter"/>
+    <conversionRule conversionWord="wex"
+                    converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter"/>
+    <conversionRule conversionWord="wEx"
+                    converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter"/>
+
+    <!-- Patrón legible y con color -->
+    <property name="CONSOLE_LOG_PATTERN"
+              value="%clr(%d{HH:mm:ss.SSS}){faint} %clr(%-5level) %clr([%thread]){faint} %clr(%logger{36}){cyan} %clr(-){faint} %msg%n"/>
+
+    <!-- Appender consola legible (sin Jansi) -->
+    <appender name="CONSOLE_PRETTY" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
             <charset>UTF-8</charset>
         </encoder>
     </appender>
 
+    <!-- Appender JSON para no-dev -->
+    <appender name="CONSOLE_JSON" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <fieldNames>
+                <timestamp>timestamp</timestamp>
+                <level>level</level>
+                <logger>logger</logger>
+                <thread>thread</thread>
+                <message>message</message>
+            </fieldNames>
+            <customFields>{"app":"${APP_NAME}"}</customFields>
+        </encoder>
+    </appender>
+
+    <!-- DEV: bonito en consola -->
     <springProfile name="dev">
-        <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
-            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-                <fieldNames>
-                    <timestamp>timestamp</timestamp>
-                    <level>level</level>
-                    <logger>logger</logger>
-                    <thread>thread</thread>
-                    <message>message</message>
-                </fieldNames>
-                <customFields>{"app":"${APP_NAME}"}</customFields>
-            </encoder>
-        </appender>
         <root level="INFO">
-            <appender-ref ref="JSON"/>
+            <appender-ref ref="CONSOLE_PRETTY"/>
         </root>
     </springProfile>
 
+    <!-- NO DEV: JSON (ideal para ELK) -->
     <springProfile name="!dev">
         <root level="INFO">
-            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="CONSOLE_JSON"/>
         </root>
     </springProfile>
 </configuration>
