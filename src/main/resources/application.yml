@@ -11,7 +11,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: "health,info"
+        include: "health,info,scheduledtasks"
   endpoint:
     health:
       enabled: true
@@ -21,6 +21,11 @@ management:
 heatmap:
   cache:
     ttl-seconds: 300
+  summary-refresh:
+    enabled: false
+    window-days: 7
+    fixed-delay-ms: 600000
+    initial-delay-ms: 10000
 
 springdoc:
   api-docs:

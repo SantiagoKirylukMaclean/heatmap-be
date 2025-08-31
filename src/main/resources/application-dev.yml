@@ -8,7 +8,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: "health,info"
+        include: "health,info,scheduledtasks"
   endpoint:
     health:
       enabled: true
@@ -42,3 +42,10 @@ springdoc:
   swagger-ui:
     enabled: true
     path: /swagger-ui.html
+
+heatmap:
+  summary-refresh:
+    enabled: true
+    window-days: 7
+    fixed-delay-ms: 600000
+    initial-delay-ms: 5000
