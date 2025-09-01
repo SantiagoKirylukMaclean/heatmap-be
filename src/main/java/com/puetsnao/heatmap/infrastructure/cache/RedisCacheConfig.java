@@ -3,6 +3,7 @@ package com.puetsnao.heatmap.infrastructure.cache;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.puetsnao.heatmap.domain.HeatPoint;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +19,7 @@ import java.time.Duration;
 import java.util.List;
 
 @Configuration
+@ConditionalOnProperty(name = "spring.cache.type", havingValue = "redis")
 @EnableConfigurationProperties(HeatmapCacheProperties.class)
 public class RedisCacheConfig {
 

@@ -129,3 +129,29 @@ Ejemplo de respuesta:
 - App corre local con Docker (Postgres + Redis).  
 - Endpoint `/api/heatmap` responde en < 1s gracias a cache.  
 - DB lista para escalar a 2B filas con materialized views + batch.  
+
+
+---
+
+## 🧪 Desarrollo local con Docker Compose
+
+Requisitos:
+- Docker y Docker Compose
+- JDK 21+
+- Gradle wrapper (incluido)
+
+Pasos:
+1. Levantar la infraestructura (Postgres + Redis):
+   - docker compose up -d
+2. Ejecutar la aplicación (perfil dev por defecto):
+   - ./gradlew bootRun
+3. Verificar que esté funcionando:
+   - curl http://localhost:8080/api/health
+   - curl "http://localhost:8080/api/heatmap?metric=price&period=last30d"
+4. Detener la infraestructura al finalizar:
+   - docker compose down -v
+
+Notas:
+- Datasource dev: jdbc:postgresql://localhost:5432/heatmap (user/password: heatmap)
+- Redis: localhost:6379
+- Flyway corre migraciones al iniciar en perfil dev.

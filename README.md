@@ -130,3 +130,29 @@ Example response:
 - App runs locally with Docker (Postgres + Redis).  
 - `/api/heatmap` responds in < 1s (thanks to cache).  
 - DB ready to scale to 2B rows with materialized views + batch.  
+
+
+---
+
+## 🧪 Local development with Docker Compose
+
+Prerequisites:
+- Docker and Docker Compose
+- JDK 21+
+- Gradle wrapper (included)
+
+Steps:
+1. Start infrastructure (Postgres + Redis):
+   - docker compose up -d
+2. Run the application (dev profile is default):
+   - ./gradlew bootRun
+3. Verify it’s running:
+   - curl http://localhost:8080/api/health
+   - curl "http://localhost:8080/api/heatmap?metric=price&period=last30d"
+4. Stop infrastructure when finished:
+   - docker compose down -v
+
+Notes:
+- Dev datasource: jdbc:postgresql://localhost:5432/heatmap (user/password: heatmap)
+- Redis: localhost:6379
+- Flyway migrations run on startup in dev profile.
