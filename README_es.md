@@ -155,3 +155,25 @@ Notas:
 - Datasource dev: jdbc:postgresql://localhost:5432/heatmap (user/password: heatmap)
 - Redis: localhost:6379
 - Flyway corre migraciones al iniciar en perfil dev.
+
+
+---
+
+## 📚 Documentación de API
+
+- Swagger UI: http://localhost:8080/swagger-ui.html (o /swagger-ui/index.html)
+- OpenAPI JSON: http://localhost:8080/v3/api-docs
+
+Endpoints:
+- GET /api/health
+  - Respuesta: { "status": "UP", "commitSha": "<opcional>" }
+- GET /api/heatmap?metric=price|volume&period=last30d
+  - Respuesta: array de HeatPoint { state, lat, lon, value }
+
+Ejemplos:
+- curl http://localhost:8080/api/health
+- curl "http://localhost:8080/api/heatmap?metric=price&period=last30d"
+
+Tiempos esperados (dev):
+- Primera llamada (frío, sin cache): hasta ~2s según dataset
+- Llamadas posteriores (cacheado): <200ms
