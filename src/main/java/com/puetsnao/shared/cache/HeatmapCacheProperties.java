@@ -1,4 +1,4 @@
-package com.puetsnao.heatmap.infrastructure.cache;
+package com.puetsnao.shared.cache;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
