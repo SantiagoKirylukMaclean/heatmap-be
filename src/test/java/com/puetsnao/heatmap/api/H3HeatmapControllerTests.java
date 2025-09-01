@@ -3,6 +3,7 @@ package com.puetsnao.heatmap.api;
 import com.puetsnao.heatmap.application.H3HeatmapService;
 import com.puetsnao.heatmap.domain.H3CellPoint;
 import com.puetsnao.heatmap.domain.Metric;
+import com.puetsnao.shared.http.DefaultEtagService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -28,7 +29,7 @@ class H3HeatmapControllerTests {
     void setup() {
         service = Mockito.mock(H3HeatmapService.class);
         mockMvc = MockMvcBuilders
-                .standaloneSetup(new H3HeatmapController(service))
+                .standaloneSetup(new H3HeatmapController(service, new DefaultEtagService()))
                 .setMessageConverters(new org.springframework.http.converter.json.MappingJackson2HttpMessageConverter())
                 .build();
     }

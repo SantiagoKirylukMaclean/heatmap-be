@@ -4,6 +4,7 @@ import com.puetsnao.heatmap.application.HeatmapService;
 import com.puetsnao.heatmap.domain.HeatPoint;
 import com.puetsnao.heatmap.domain.Metric;
 import com.puetsnao.heatmap.domain.Period;
+import com.puetsnao.shared.http.EtagService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -14,10 +15,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -26,9 +29,11 @@ import java.util.List;
 public class HeatmapController {
 
     private final HeatmapService heatmapService;
+    private final EtagService etagService;
 
-    public HeatmapController(HeatmapService heatmapService) {
+    public HeatmapController(HeatmapService heatmapService, EtagService etagService) {
         this.heatmapService = heatmapService;
+        this.etagService = etagService;
     }
 
     @GetMapping
@@ -58,9 +63,16 @@ public class HeatmapController {
                     schema = @Schema(allowableValues = {"last30d"}),
                     example = "last30d"
             )
-            @RequestParam(name = "period", defaultValue = "last30d") String period) {
+            @RequestParam(name = "period", defaultValue = "last30d") String period,
+            @RequestHeader(name = "If-None-Match", required = false) String ifNoneMatch
+    ) {
         Metric m = Metric.from(metric);
         Period p = Period.from(period);
-        return ResponseEntity.ok(heatmapService.heatmap(m, p));
+        String version = LocalDate.now().toString();
+        String etag = etagService.buildWeak("heatmap", m.name().toLowerCase(), p.name().toLowerCase(), version);
+        if (etagService.matches(ifNoneMatch, etag)) {
+            return ResponseEntity.status(304).eTag(etag).build();
+        }
+        return ResponseEntity.ok().eTag(etag).body(heatmapService.heatmap(m, p));
     }
 }

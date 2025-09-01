@@ -4,6 +4,7 @@ import com.puetsnao.heatmap.application.HeatmapService;
 import com.puetsnao.heatmap.domain.HeatPoint;
 import com.puetsnao.heatmap.domain.Metric;
 import com.puetsnao.heatmap.domain.Period;
+import com.puetsnao.shared.http.DefaultEtagService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -27,7 +28,7 @@ class HeatmapControllerTests {
     void setup() {
         heatmapService = Mockito.mock(HeatmapService.class);
         mockMvc = MockMvcBuilders
-                .standaloneSetup(new HeatmapController(heatmapService))
+                .standaloneSetup(new HeatmapController(heatmapService, new DefaultEtagService()))
                 .setMessageConverters(new org.springframework.http.converter.json.MappingJackson2HttpMessageConverter())
                 .build();
     }

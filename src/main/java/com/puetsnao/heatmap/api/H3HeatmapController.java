@@ -4,6 +4,7 @@ import com.puetsnao.heatmap.application.H3HeatmapService;
 import com.puetsnao.heatmap.domain.BucketGranularity;
 import com.puetsnao.heatmap.domain.H3CellPoint;
 import com.puetsnao.heatmap.domain.Metric;
+import com.puetsnao.shared.http.EtagService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -14,10 +15,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RestController
@@ -26,9 +31,11 @@ import java.util.List;
 public class H3HeatmapController {
 
     private final H3HeatmapService service;
+    private final EtagService etagService;
 
-    public H3HeatmapController(H3HeatmapService service) {
+    public H3HeatmapController(H3HeatmapService service, EtagService etagService) {
         this.service = service;
+        this.etagService = etagService;
     }
 
     @GetMapping
@@ -54,10 +61,24 @@ public class H3HeatmapController {
             @Parameter(description = "Bucket granularity: day or hour", schema = @Schema(allowableValues = {"day", "hour"}), example = "day")
             @RequestParam(name = "bucket", defaultValue = "day") String bucket,
             @Parameter(description = "Point in time for the bucket: YYYY-MM-DD for day, or YYYY-MM-DDTHH:00 for hour", example = "2025-09-01")
-            @RequestParam(name = "at", required = false) String at
+            @RequestParam(name = "at", required = false) String at,
+            @RequestHeader(name = "If-None-Match", required = false) String ifNoneMatch
     ) {
         Metric m = Metric.from(metric);
         BucketGranularity b = BucketGranularity.from(bucket);
-        return ResponseEntity.ok(service.query(m, resolution, b, at));
+        String version = switch (b) {
+            case DAY -> (at == null || at.isBlank()) ? LocalDate.now().toString() : at;
+            case HOUR -> {
+                if (at == null || at.isBlank()) {
+                    yield LocalDateTime.now().withMinute(0).withSecond(0).withNano(0).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+                }
+                yield at;
+            }
+        };
+        String etag = etagService.buildWeak("heatmap:h3", m.name().toLowerCase(), String.valueOf(resolution), b.name().toLowerCase(), version);
+        if (etagService.matches(ifNoneMatch, etag)) {
+            return ResponseEntity.status(304).eTag(etag).build();
+        }
+        return ResponseEntity.ok().eTag(etag).body(service.query(m, resolution, b, at));
     }
 }
