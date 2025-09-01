@@ -158,16 +158,6 @@ La app es un monolito modular listo para evolucionar a microservicios. Este plan
 
 ---
 
-## Paso 13 — Preparación a microservicios (opcional)
-- Cambios:
-  - Paquetes por vertical (heatmap, station, product, price, sales) con interfaces claras.
-  - Configurar módulos lógicos y límites anti-corrupción.
-- Commit:
-  - `refactor(arch): enforce vertical boundaries for modular monolith`
-- Aceptación: dependencia unidireccional respetada.
-
----
-
 ## Entrevista: respuestas clave
 1) Monolito vs Microservicios
 - Preferencia inicial: monolito modular por velocidad y simplicidad operativa; diseñar límites para escalar a microservicios cuando haya dolor claro (equipos independientes, escalamiento diferencial, ritmos de despliegue).
