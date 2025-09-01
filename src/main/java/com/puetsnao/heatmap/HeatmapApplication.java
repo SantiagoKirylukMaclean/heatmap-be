@@ -14,7 +14,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EntityScan(basePackages = "com.puetsnao")
 @EnableCaching
 @EnableScheduling
-@EnableConfigurationProperties(SummaryRefreshProperties.class)
+@EnableConfigurationProperties({SummaryRefreshProperties.class, com.puetsnao.heatmap.infrastructure.security.RateLimitProperties.class})
 public class HeatmapApplication {
 
 	public static void main(String[] args) {

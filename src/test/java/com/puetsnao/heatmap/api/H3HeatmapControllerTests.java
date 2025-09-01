@@ -1,9 +1,8 @@
 package com.puetsnao.heatmap.api;
 
-import com.puetsnao.heatmap.application.HeatmapService;
-import com.puetsnao.heatmap.domain.HeatPoint;
+import com.puetsnao.heatmap.application.H3HeatmapService;
+import com.puetsnao.heatmap.domain.H3CellPoint;
 import com.puetsnao.heatmap.domain.Metric;
-import com.puetsnao.heatmap.domain.Period;
 import com.puetsnao.shared.http.DefaultEtagService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,41 +13,44 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-class HeatmapControllerTests {
+class H3HeatmapControllerTests {
 
     private MockMvc mockMvc;
-    private HeatmapService heatmapService;
+    private H3HeatmapService service;
 
     @BeforeEach
     void setup() {
-        heatmapService = Mockito.mock(HeatmapService.class);
+        service = Mockito.mock(H3HeatmapService.class);
         mockMvc = MockMvcBuilders
-                .standaloneSetup(new HeatmapController(heatmapService, new DefaultEtagService()))
+                .standaloneSetup(new H3HeatmapController(service, new DefaultEtagService()))
                 .setMessageConverters(new org.springframework.http.converter.json.MappingJackson2HttpMessageConverter())
                 .build();
     }
 
     @Test
-    void returnsHeatmapPoints() throws Exception {
-        List<HeatPoint> points = List.of(
-                new HeatPoint("STA", 11.0, 22.0, 150.0),
-                new HeatPoint("STB", -5.0, 30.0, 300.0)
+    void returnsH3Cells() throws Exception {
+        List<H3CellPoint> points = List.of(
+                new H3CellPoint("85283473fffffff", 7, 2.15),
+                new H3CellPoint("85283477fffffff", 7, 1.10)
         );
-        when(heatmapService.heatmap(Metric.PRICE, Period.LAST30D)).thenReturn(points);
+        when(service.query(Mockito.eq(Metric.PRICE), anyInt(), any(), Mockito.anyString())).thenReturn(points);
 
-        mockMvc.perform(get("/api/heatmap")
+        mockMvc.perform(get("/api/heatmap/h3")
                         .param("metric", "price")
-                        .param("period", "last30d")
+                        .param("resolution", "7")
+                        .param("bucket", "day")
+                        .param("at", "2025-09-01")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].state").value("STA"))
-                .andExpect(jsonPath("$[0].lat").value(11.0))
-                .andExpect(jsonPath("$[0].lon").value(22.0))
-                .andExpect(jsonPath("$[0].value").value(150.0));
+                .andExpect(jsonPath("$[0].cell").value("85283473fffffff"))
+                .andExpect(jsonPath("$[0].resolution").value(7))
+                .andExpect(jsonPath("$[0].value").value(2.15));
     }
 }

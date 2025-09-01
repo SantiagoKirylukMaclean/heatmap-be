@@ -34,6 +34,7 @@ dependencies {
     implementation("org.flywaydb:flyway-core:10.17.2")
     implementation("org.flywaydb:flyway-database-postgresql:10.17.2")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
+    implementation("com.uber:h3:3.7.2")
     runtimeOnly("org.postgresql:postgresql")
     runtimeOnly("net.logstash.logback:logstash-logback-encoder:7.4")
     testImplementation("org.springframework.boot:spring-boot-starter-test")

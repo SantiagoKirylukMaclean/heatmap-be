@@ -3,18 +3,14 @@ package com.puetsnao.heatmap.application;
 import com.puetsnao.heatmap.domain.HeatPoint;
 import com.puetsnao.heatmap.domain.Metric;
 import com.puetsnao.heatmap.domain.Period;
-import com.puetsnao.price.infrastructure.PriceEntity;
-import com.puetsnao.price.infrastructure.PriceRepository;
-import com.puetsnao.sales.infrastructure.SaleEntity;
-import com.puetsnao.sales.infrastructure.SaleRepository;
-import com.puetsnao.station.infrastructure.StationEntity;
-import com.puetsnao.station.infrastructure.StationRepository;
+import com.puetsnao.price.app.PriceQueryPort;
+import com.puetsnao.sales.app.SalesQueryPort;
+import com.puetsnao.station.app.StationQueryPort;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -23,26 +19,26 @@ public class DefaultHeatmapServiceTests {
 
     @Test
     void aggregatesPriceAverageAndVolumeSumByState() {
-        StationRepository stationRepository = Mockito.mock(StationRepository.class);
-        PriceRepository priceRepository = Mockito.mock(PriceRepository.class);
-        SaleRepository saleRepository = Mockito.mock(SaleRepository.class);
+        StationQueryPort stationQuery = Mockito.mock(StationQueryPort.class);
+        PriceQueryPort priceQuery = Mockito.mock(PriceQueryPort.class);
+        SalesQueryPort salesQuery = Mockito.mock(SalesQueryPort.class);
 
-        StationEntity stA1 = station("A1", "STA", 10.0, 20.0);
-        StationEntity stA2 = station("A2", "STA", 12.0, 24.0);
-        StationEntity stB1 = station("B1", "STB", -5.0, 30.0);
-        when(stationRepository.findAll()).thenReturn(List.of(stA1, stA2, stB1));
+        StationQueryPort.StationLocation stA1 = new StationQueryPort.StationLocation("STA", 10.0, 20.0);
+        StationQueryPort.StationLocation stA2 = new StationQueryPort.StationLocation("STA", 12.0, 24.0);
+        StationQueryPort.StationLocation stB1 = new StationQueryPort.StationLocation("STB", -5.0, 30.0);
+        when(stationQuery.stations()).thenReturn(List.of(stA1, stA2, stB1));
 
-        PriceEntity p1 = price(stA1, 100.0, LocalDateTime.now().minusDays(5));
-        PriceEntity p2 = price(stA2, 200.0, LocalDateTime.now().minusDays(3));
-        PriceEntity p3 = price(stB1, 300.0, LocalDateTime.now().minusDays(2));
-        when(priceRepository.findAll()).thenReturn(List.of(p1, p2, p3));
+        when(priceQuery.averagePriceByState(Mockito.any(), Mockito.any())).thenReturn(Map.of(
+                "STA", (100.0 + 200.0) / 2.0,
+                "STB", 300.0
+        ));
 
-        SaleEntity s1 = sale(stA1, 10.0, LocalDateTime.now().minusDays(1));
-        SaleEntity s2 = sale(stA2, 15.0, LocalDateTime.now().minusDays(1));
-        SaleEntity s3 = sale(stB1, 7.0, LocalDateTime.now().minusDays(1));
-        when(saleRepository.findAll()).thenReturn(List.of(s1, s2, s3));
+        when(salesQuery.totalVolumeByState(Mockito.any(), Mockito.any())).thenReturn(Map.of(
+                "STA", 25.0,
+                "STB", 7.0
+        ));
 
-        DefaultHeatmapService service = new DefaultHeatmapService(stationRepository, priceRepository, saleRepository);
+        DefaultHeatmapService service = new DefaultHeatmapService(stationQuery, priceQuery, salesQuery);
 
         var pricePoints = service.heatmap(Metric.PRICE, Period.LAST30D);
         var volumePoints = service.heatmap(Metric.VOLUME, Period.LAST30D);
@@ -62,33 +58,5 @@ public class DefaultHeatmapServiceTests {
         // centroid of state STA from (10,20) and (12,24)
         assertThat(staPrice.lat()).isEqualTo((10.0 + 12.0) / 2.0);
         assertThat(staPrice.lon()).isEqualTo((20.0 + 24.0) / 2.0);
-    }
-
-    private StationEntity station(String code, String state, double lat, double lon) {
-        StationEntity s = new StationEntity();
-        s.setCode(code);
-        s.setName(code);
-        s.setState(state);
-        s.setLatitude(BigDecimal.valueOf(lat));
-        s.setLongitude(BigDecimal.valueOf(lon));
-        return s;
-        }
-
-    private PriceEntity price(StationEntity station, double amount, LocalDateTime at) {
-        PriceEntity p = new PriceEntity();
-        p.setStation(station);
-        p.setProduct(null);
-        p.setAmount(BigDecimal.valueOf(amount));
-        p.setEffectiveAt(at);
-        return p;
-    }
-
-    private SaleEntity sale(StationEntity station, double volume, LocalDateTime at) {
-        SaleEntity s = new SaleEntity();
-        s.setStation(station);
-        s.setProduct(null);
-        s.setVolume(BigDecimal.valueOf(volume));
-        s.setSoldAt(at);
-        return s;
     }
 }
