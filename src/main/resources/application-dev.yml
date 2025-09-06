@@ -64,3 +64,19 @@ heatmap:
     window-days: 7
     fixed-delay-ms: 600000
     initial-delay-ms: 5000
+
+app:
+  cors:
+    allowed-origins:
+      - http://localhost:5173
+    allowed-methods:
+      - GET
+      - HEAD
+      - OPTIONS
+    allowed-headers:
+      - "*"
+    exposed-headers:
+      - ETag
+      - Cache-Control
+    max-age-seconds: 3600
+    allow-credentials: false
