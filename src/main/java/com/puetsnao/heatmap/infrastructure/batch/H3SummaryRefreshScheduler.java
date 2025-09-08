@@ -25,7 +25,7 @@ public class H3SummaryRefreshScheduler {
 
     private static final Logger log = LoggerFactory.getLogger(H3SummaryRefreshScheduler.class);
 
-    private static final int[] RESOLUTIONS = new int[]{5, 7, 9};
+    private static final int[] RESOLUTIONS = new int[]{5, 6, 7, 8, 9, 10};
 
     private final JdbcTemplate jdbcTemplate;
     private final SummaryRefreshProperties properties;
@@ -39,12 +39,20 @@ public class H3SummaryRefreshScheduler {
             initialDelayString = "${heatmap.summary-refresh.initial-delay-ms:15000}")
     @Transactional
     public void refreshH3() {
-        LocalDate today = LocalDate.now();
+        LocalDate base = properties.targetDate() != null ? properties.targetDate() : LocalDate.now();
         int windowDays = Math.max(properties.windowDays(), 1);
-        LocalDate fromDate = today.minusDays(windowDays);
-        LocalDate toDate = today;
+        LocalDate fromDate;
+        LocalDate toDate;
+        if (properties.targetDate() != null) {
+            fromDate = base;
+            toDate = base;
+        } else {
+            // inclusive window of 'windowDays' ending at 'base'
+            fromDate = base.minusDays(windowDays - 1L);
+            toDate = base;
+        }
 
-        log.info("Starting H3 summary refresh windowDays={} from={} to={}", windowDays, fromDate, toDate);
+        log.info("Starting H3 summary refresh windowDays={} from={} to={} (targetDate={})", windowDays, fromDate, toDate, properties.targetDate());
 
         upsertStationH3Index();
         refreshDailyH3(fromDate, toDate);
@@ -55,7 +63,7 @@ public class H3SummaryRefreshScheduler {
 
     private void upsertStationH3Index() {
         List<StationRow> stations = jdbcTemplate.query(
-                "SELECT id, latitude, longitude FROM station",
+                "SELECT id, latitude, longitude FROM station WHERE state = 'NJ'",
                 (rs, rowNum) -> new StationRow(rs.getLong("id"), rs.getDouble("latitude"), rs.getDouble("longitude"))
         );
         if (stations.isEmpty()) return;

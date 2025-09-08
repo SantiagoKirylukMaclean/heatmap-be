@@ -61,9 +61,16 @@ springdoc:
 heatmap:
   summary-refresh:
     enabled: true
-    window-days: 7
+    window-days: 1
     fixed-delay-ms: 600000
     initial-delay-ms: 5000
+    target-date: 2025-09-08
+
+dev:
+  seed:
+    enabled: true
+    nj-stations-count: 8000
+    day: 2025-09-08
 
 app:
   cors:

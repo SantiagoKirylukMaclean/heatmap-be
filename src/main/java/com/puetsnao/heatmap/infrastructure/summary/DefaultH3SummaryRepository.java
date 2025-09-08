@@ -86,4 +86,90 @@ public class DefaultH3SummaryRepository implements H3SummaryRepository {
             return result;
         });
     }
+
+    @Override
+    public Map<String, PriceInputs> h10PriceByDay(LocalDate bucketDate) {
+        String sql = """
+            SELECT h3_cell,
+                   SUM(COALESCE(price_sum, 0)) AS price_sum,
+                   SUM(COALESCE(price_count, 0)) AS price_count
+            FROM daily_h3_product_summary
+            WHERE bucket_date = ? AND resolution = 10
+            GROUP BY h3_cell
+            HAVING SUM(COALESCE(price_count, 0)) > 0
+            """;
+        return jdbcTemplate.query(sql, ps -> ps.setDate(1, Date.valueOf(bucketDate)), rs -> {
+            Map<String, PriceInputs> result = new HashMap<>();
+            while (rs.next()) {
+                String cell = rs.getString("h3_cell");
+                BigDecimal sum = rs.getBigDecimal("price_sum");
+                long count = rs.getLong("price_count");
+                result.put(cell, new PriceInputs(sum != null ? sum.doubleValue() : 0.0, count));
+            }
+            return result;
+        });
+    }
+
+    @Override
+    public Map<String, PriceInputs> h10PriceByHour(LocalDateTime bucketHour) {
+        String sql = """
+            SELECT h3_cell,
+                   SUM(COALESCE(price_sum, 0)) AS price_sum,
+                   SUM(COALESCE(price_count, 0)) AS price_count
+            FROM hourly_h3_product_summary
+            WHERE bucket_hour = ? AND resolution = 10
+            GROUP BY h3_cell
+            HAVING SUM(COALESCE(price_count, 0)) > 0
+            """;
+        return jdbcTemplate.query(sql, ps -> ps.setTimestamp(1, Timestamp.valueOf(bucketHour)), rs -> {
+            Map<String, PriceInputs> result = new HashMap<>();
+            while (rs.next()) {
+                String cell = rs.getString("h3_cell");
+                BigDecimal sum = rs.getBigDecimal("price_sum");
+                long count = rs.getLong("price_count");
+                result.put(cell, new PriceInputs(sum != null ? sum.doubleValue() : 0.0, count));
+            }
+            return result;
+        });
+    }
+
+    @Override
+    public Map<String, Double> h10VolumeByDay(LocalDate bucketDate) {
+        String sql = """
+            SELECT h3_cell,
+                   SUM(COALESCE(volume_sum, 0)) AS volume_sum
+            FROM daily_h3_product_summary
+            WHERE bucket_date = ? AND resolution = 10
+            GROUP BY h3_cell
+            """;
+        return jdbcTemplate.query(sql, ps -> ps.setDate(1, Date.valueOf(bucketDate)), rs -> {
+            Map<String, Double> result = new HashMap<>();
+            while (rs.next()) {
+                String cell = rs.getString("h3_cell");
+                BigDecimal sum = rs.getBigDecimal("volume_sum");
+                result.put(cell, sum != null ? sum.doubleValue() : 0.0);
+            }
+            return result;
+        });
+    }
+
+    @Override
+    public Map<String, Double> h10VolumeByHour(LocalDateTime bucketHour) {
+        String sql = """
+            SELECT h3_cell,
+                   SUM(COALESCE(volume_sum, 0)) AS volume_sum
+            FROM hourly_h3_product_summary
+            WHERE bucket_hour = ? AND resolution = 10
+            GROUP BY h3_cell
+            """;
+        return jdbcTemplate.query(sql, ps -> ps.setTimestamp(1, Timestamp.valueOf(bucketHour)), rs -> {
+            Map<String, Double> result = new HashMap<>();
+            while (rs.next()) {
+                String cell = rs.getString("h3_cell");
+                BigDecimal sum = rs.getBigDecimal("volume_sum");
+                result.put(cell, sum != null ? sum.doubleValue() : 0.0);
+            }
+            return result;
+        });
+    }
 }

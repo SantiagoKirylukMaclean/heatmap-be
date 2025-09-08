@@ -64,7 +64,14 @@ Migrations:
 - Flyway manages schema under `src/main/resources/db/migration`
 
 Dev dataset seeding:
-- In the `dev` profile, `DevDatasetLoader` will generate synthetic `price` and `sales` rows if the `station`/`product` reference tables exist and price/sales are empty.
+- In the `dev` profile, `DevDatasetLoader` can generate data when price/sales are empty.
+  - Default mode: multi-day light dataset across seeded stations
+  - Heavy NJ mode (opt-in): set in application-dev.yml
+    - dev.seed.enabled: true
+    - dev.seed.nj-stations-count: 8000 (configurable)
+    - dev.seed.day: 2025-09-08
+    - heatmap.summary-refresh.target-date: 2025-09-08 and window-days: 1
+    - Generates only New Jersey stations and hourly price/sales for that day to approximate ~2M H3 summary rows (H2..H15)
 
 ## REST API
 Base URL: `http://localhost:8080`
@@ -85,7 +92,7 @@ Heatmap by H3 cell
 - GET `/api/heatmap/h3`
   - Query params:
     - `metric` (required): `price` | `volume`
-    - `resolution` (required): integer H3 resolution (e.g., 5, 7, 9)
+    - `resolution` (required): integer H3 resolution (2 to 15)
     - `bucket` (optional, default `day`): `day` | `hour`
     - `at` (optional): `YYYY-MM-DD` when bucket=day, or `YYYY-MM-DDTHH:00` when bucket=hour
   - ETag: supports `If-None-Match` and responds `304 Not Modified` when unchanged
